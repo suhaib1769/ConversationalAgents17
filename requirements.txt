@@ -1,0 +1,7 @@
+huggingface-hub==0.20.1
+openai-whisper==20231117
+PyAudio==0.2.14
+tokenizers==0.15.0
+torch==2.1.2
+transformers==4.36.2
+Wave==0.0.2
