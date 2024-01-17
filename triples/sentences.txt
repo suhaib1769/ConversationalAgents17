@@ -1,0 +1,10 @@
+Alice is an engineer. 
+Alice works at TechCorp.
+TechCorp is a technology company. 
+TechCorp is located in Silicon Valley.
+Bob is a colleague of Alice. 
+Bob works at TechCorp.
+Bob attended a conference in New York last month.
+New York is known for its vibrant technology sector.
+Alice hates her work. 
+Bob is in love with Alice. 
