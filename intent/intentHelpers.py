@@ -149,7 +149,7 @@ def convert_slots_to_query_params(slots, sentence):
 
     query_params = {}
     for key, value in slot_dict.items():
-        if slot_label_to_query_param[key]:
+        if key in slot_label_to_query_param.keys() and slot_label_to_query_param[key]:
             if slot_label_to_query_param[key] in query_params:
                 query_params[slot_label_to_query_param[key]].append(value)
             query_params[slot_label_to_query_param[key]] = [value]
@@ -172,7 +172,7 @@ def get_query_params(utterance):
 
             
 
-
+# meal_suggestion
 
 ### HOW TO RUN IN SCRIPT
 # from intentHelpers import *
