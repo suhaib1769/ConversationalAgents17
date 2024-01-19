@@ -173,6 +173,9 @@ def get_query_params(utterance):
             
 
 # meal_suggestion
+# resaturant_suggestion
+# travel_suggestion
+
 
 ### HOW TO RUN IN SCRIPT
 # from intentHelpers import *
