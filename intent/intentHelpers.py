@@ -88,6 +88,7 @@ slotLabeller = SlotLabeller(loaded_model, slot_tokenizer, slot_label_list, slot_
 
 
 
+### METHODS
 def sample_sentence():
     return "What is a good restaurant to eat in in Spain?"
 
@@ -101,17 +102,36 @@ def getSlots(utterance):
 
 
 
+# mappping from slot labels to query params
+slot_label_to_query_param = {
+    "served_dish": "Cuisine Style",
+    "cuisine": "Cuisine Style",
 
+    "entity_name": "Name",
+    "restaurant_name": "Name",
 
+    "city": "City",
+    "country": "City",
+    "spatial_relation": "City",
+    "state": "City",
+    "location_name": "City",
+    "poi": "City",
+
+    "restaurant_type": None,
+    # open to improvement
+    "sort": None,
+}
+
+# convert the slots to query params
 def convert_slots_to_query_params(slots, sentence):
-    query_params = {}
+    slot_dict = {}
     current_slot = None
     current_value = None
 
     for word, slot in zip(sentence.split(), slots):
         if slot.startswith('B-'):
             if current_slot:
-                query_params[current_slot] = current_value
+                slot_dict[current_slot] = current_value
             current_slot = slot[2:]
             current_value = word
         elif slot.startswith('I-'):
@@ -119,19 +139,27 @@ def convert_slots_to_query_params(slots, sentence):
                 current_value += ' ' + word
         else:
             if current_slot:
-                query_params[current_slot] = current_value
+                slot_dict[current_slot] = current_value
             current_slot = None
             current_value = None
 
     if current_slot:
-        query_params[current_slot] = current_value
+        slot_dict[current_slot] = current_value
+
+
+    query_params = {}
+    for key, value in slot_dict.items():
+        if slot_label_to_query_param[key]:
+            if slot_label_to_query_param[key] in query_params:
+                query_params[slot_label_to_query_param[key]].append(value)
+            query_params[slot_label_to_query_param[key]] = [value]
 
     return query_params
 
 
 
 
-
+# get the intent and query params from the utterance
 def get_query_params(utterance):
     intent = getIntent(utterance)
     slots = getSlots(utterance)
@@ -146,8 +174,10 @@ def get_query_params(utterance):
 
 
 
-
-
 ### HOW TO RUN IN SCRIPT
 # from intentHelpers import *
 # get_query_params(sample_sentence())
+
+# example:
+# get_query_params("Find a Greek restaurant in Rotterdam")
+# ('restaurant_suggestion', {'Cuisine Style': ['Greek'], 'City': ['Rotterdam']})
