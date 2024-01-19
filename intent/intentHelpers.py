@@ -1,8 +1,10 @@
 import numpy as np
 from keras.preprocessing.sequence import pad_sequences
+from dataframe import query_restaurants
 
 import pickle
 from keras.models import load_model
+import pandas as pd
 
 
 ### CLASSES THAT ABSTRACT THE CLASSIFICATION/LABELLING PROCESS
@@ -150,12 +152,11 @@ def convert_slots_to_query_params(slots, sentence):
     query_params = {}
     for key, value in slot_dict.items():
         if key in slot_label_to_query_param.keys() and slot_label_to_query_param[key]:
-            if slot_label_to_query_param[key] in query_params:
-                query_params[slot_label_to_query_param[key]].append(value)
-            query_params[slot_label_to_query_param[key]] = [value]
+            # if slot_label_to_query_param[key] in query_params:
+            #     query_params[slot_label_to_query_param[key]].append(value)
+            query_params[slot_label_to_query_param[key]] = value
 
     return query_params
-
 
 
 
@@ -168,7 +169,19 @@ def get_query_params(utterance):
     query_params = convert_slots_to_query_params(slots, clean_utterance)
 
     print("query_params: ", query_params)
-    return intent, query_params
+    return query_params
+
+def return_restaurants(query_params):
+    df = pd.read_csv('TA_restaurants_curated.csv')
+    # encode the price range as a number from 1 to 4
+    df['Price Range'] = df['Price Range'].replace('$', 1)
+    df['Price Range'] = df['Price Range'].replace('$$', 2)
+    df['Price Range'] = df['Price Range'].replace('$$ - $$$', 3)
+    df['Price Range'] = df['Price Range'].replace('$$$$', 4)
+    df['Cuisine Style'] = df['Cuisine Style'].apply(lambda x: eval(x) if pd.notnull(x) else [])
+    restaurants = query_restaurants(df, query_params)
+    names = restaurants['Name'].tolist()
+    return names
 
             
 
