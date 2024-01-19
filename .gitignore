@@ -33,7 +33,10 @@ secrets.txt
 .DS_Store
 Thumbs.db
 
-
 # Ignore large and generated files
 ASR_test/*.wav
 intent/*.txt
+
+# Ignore Python cache files
+__pycache__/
+

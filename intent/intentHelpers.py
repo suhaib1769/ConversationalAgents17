@@ -1,0 +1,153 @@
+import numpy as np
+from keras.preprocessing.sequence import pad_sequences
+
+import pickle
+from keras.models import load_model
+
+
+### CLASSES THAT ABSTRACT THE CLASSIFICATION/LABELLING PROCESS
+# a class that takes in encoding/model components and returns the intent of a given text
+class SlotLabeller:
+    def __init__(self, model, tokenizer, label_list, index_list, max_seq_len):
+        self.model = model
+        self.tokenizer = tokenizer
+        self.label_list = label_list
+        self.index_list = index_list
+        self.max_seq_len = max_seq_len
+
+    def fill_slots(self, text):
+        self.text = [text]
+        self.input_seq = self.tokenizer.texts_to_sequences(self.text)
+        self.sequence = pad_sequences(self.input_seq, maxlen=self.max_seq_len, padding='post')
+
+        prediction = self.model.predict(self.sequence)
+        return [self.label_list[self.index_list.index(j)] for j in [np.argmax(x) for x in prediction[0][:]] if j in self.index_list]
+    
+
+# a class that takes in encoding/model components and returns the intent of a given text
+class IntentClassifier:
+    def __init__(self, classes, model, tokenizer, label_encoder):
+        self.classes = classes
+        self.classifier = model
+        self.tokenizer = tokenizer
+        self.label_encoder = label_encoder
+
+    def get_intent(self,text):
+        self.text = [text]
+        self.test_keras = self.tokenizer.texts_to_sequences(self.text)
+        self.test_keras_sequence = pad_sequences(self.test_keras, maxlen=16, padding='post')
+
+        self.pred = self.classifier.predict(self.test_keras_sequence)
+        return self.label_encoder.inverse_transform(np.argmax(self.pred,1))[0]
+    
+
+
+
+### LOAD THE MODELS
+
+# load the intent model
+intents_model = load_model('models/intents.keras')
+
+# load the necessary supllementary components
+with open('./utils/classes.pkl','rb') as file:
+    intents_classes = pickle.load(file)
+
+with open('./utils/tokenizer.pkl','rb') as file:
+    intents_tokenizer = pickle.load(file)
+
+with open('./utils/label_encoder.pkl','rb') as file:
+    intents_label_encoder = pickle.load(file)
+
+
+# load the slot labelling model
+loaded_model = load_model('models/slotLabelling.keras')
+
+# load the necessary supllementary components
+with open('./slotLabelModel/tokenizer.pkl','rb') as file:
+    slot_tokenizer = pickle.load(file)
+
+with open('./slotLabelModel/label_list.pkl','rb') as file:
+    slot_label_list = pickle.load(file)
+
+with open('./slotLabelModel/index_list.pkl','rb') as file:
+    slot_index_list = pickle.load(file)
+
+with open('./slotLabelModel/max_seq_length.pkl','rb') as file:
+    slot_max_seq_length = pickle.load(file)
+
+
+
+
+
+# BEHOLD: THE CLASSIFIER
+intentClassifier = IntentClassifier(intents_classes, intents_model, intents_tokenizer, intents_label_encoder)
+
+
+# BEHOLD: THE SLOT LABELLER
+slotLabeller = SlotLabeller(loaded_model, slot_tokenizer, slot_label_list, slot_index_list, slot_max_seq_length)
+
+
+
+def sample_sentence():
+    return "What is a good restaurant to eat in in Spain?"
+
+def getIntent(utterance):
+    intent = intentClassifier.get_intent(utterance)
+    return intent
+
+def getSlots(utterance):
+    slots = slotLabeller.fill_slots(utterance)
+    return slots
+
+
+
+
+
+def convert_slots_to_query_params(slots, sentence):
+    query_params = {}
+    current_slot = None
+    current_value = None
+
+    for word, slot in zip(sentence.split(), slots):
+        if slot.startswith('B-'):
+            if current_slot:
+                query_params[current_slot] = current_value
+            current_slot = slot[2:]
+            current_value = word
+        elif slot.startswith('I-'):
+            if current_slot:
+                current_value += ' ' + word
+        else:
+            if current_slot:
+                query_params[current_slot] = current_value
+            current_slot = None
+            current_value = None
+
+    if current_slot:
+        query_params[current_slot] = current_value
+
+    return query_params
+
+
+
+
+
+def get_query_params(utterance):
+    intent = getIntent(utterance)
+    slots = getSlots(utterance)
+
+    clean_utterance = "".join((filter(lambda x: x.isalnum() or x.isspace(), utterance)))
+    query_params = convert_slots_to_query_params(slots, clean_utterance)
+
+    print("query_params: ", query_params)
+    return intent, query_params
+
+            
+
+
+
+
+
+### HOW TO RUN IN SCRIPT
+# from intentHelpers import *
+# get_query_params(sample_sentence())
