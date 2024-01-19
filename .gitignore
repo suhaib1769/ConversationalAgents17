@@ -32,3 +32,8 @@ secrets.txt
 # Ignore OS specific files
 .DS_Store
 Thumbs.db
+
+
+# Ignore large and generated files
+ASR_test/*.wav
+intent/*.txt
