@@ -171,6 +171,8 @@ def get_query_params(utterance):
     print("query_params: ", query_params)
     return query_params
 
+
+# get the restaurants given the query params
 def return_restaurants(query_params):
     df = pd.read_csv('TA_restaurants_curated.csv')
     # encode the price range as a number from 1 to 4
