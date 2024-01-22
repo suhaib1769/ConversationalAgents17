@@ -22,7 +22,7 @@ def gen_query(context, user_input):
     return query.format(context_string, user_input)
 
 #send the query to GPT API and get the response
-def ask_gpt(query):
+def ask_GPT(query):
     stream = client.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=[{"role": "user", "content": query}],

@@ -1,6 +1,6 @@
 import numpy as np
 from keras.preprocessing.sequence import pad_sequences
-from dataframe import query_restaurants
+# from dataframe import query_restaurants
 
 import pickle
 from keras.models import load_model
@@ -48,33 +48,33 @@ class IntentClassifier:
 ### LOAD THE MODELS
 
 # load the intent model
-intents_model = load_model('models/intents.keras')
+intents_model = load_model('intent/models/intents.keras')
 
 # load the necessary supllementary components
-with open('./utils/classes.pkl','rb') as file:
+with open('intent/utils/classes.pkl','rb') as file:
     intents_classes = pickle.load(file)
 
-with open('./utils/tokenizer.pkl','rb') as file:
+with open('intent/utils/tokenizer.pkl','rb') as file:
     intents_tokenizer = pickle.load(file)
 
-with open('./utils/label_encoder.pkl','rb') as file:
+with open('intent/utils/label_encoder.pkl','rb') as file:
     intents_label_encoder = pickle.load(file)
 
 
 # load the slot labelling model
-loaded_model = load_model('models/slotLabelling.keras')
+loaded_model = load_model('intent/models/slotLabelling.keras')
 
 # load the necessary supllementary components
-with open('./slotLabelModel/tokenizer.pkl','rb') as file:
+with open('intent/slotLabelModel/tokenizer.pkl','rb') as file:
     slot_tokenizer = pickle.load(file)
 
-with open('./slotLabelModel/label_list.pkl','rb') as file:
+with open('intent/slotLabelModel/label_list.pkl','rb') as file:
     slot_label_list = pickle.load(file)
 
-with open('./slotLabelModel/index_list.pkl','rb') as file:
+with open('intent/slotLabelModel/index_list.pkl','rb') as file:
     slot_index_list = pickle.load(file)
 
-with open('./slotLabelModel/max_seq_length.pkl','rb') as file:
+with open('intent/slotLabelModel/max_seq_length.pkl','rb') as file:
     slot_max_seq_length = pickle.load(file)
 
 
@@ -181,9 +181,9 @@ def return_restaurants(query_params):
     df['Price Range'] = df['Price Range'].replace('$$ - $$$', 3)
     df['Price Range'] = df['Price Range'].replace('$$$$', 4)
     df['Cuisine Style'] = df['Cuisine Style'].apply(lambda x: eval(x) if pd.notnull(x) else [])
-    restaurants = query_restaurants(df, query_params)
-    names = restaurants['Name'].tolist()
-    return names
+    # restaurants = query_restaurants(df, query_params)
+    # names = restaurants['Name'].tolist()
+    return []
 
             
 
