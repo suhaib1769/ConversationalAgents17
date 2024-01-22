@@ -2,6 +2,7 @@ from furhat_remote_api import FurhatRemoteAPI
 from helpers import *
 from intent.intentHelpers import get_query_params, getIntent, return_restaurants
 from triples.triple import extract_triples1, triple_embedding, metadata_embedding
+import logging
 
 
 
@@ -11,7 +12,8 @@ conversation_sessions = ['only_short_term', 'short_and_long_term']
 
 # have furhat respond to the query
 def respond(response):
-    furhat.say(text=response)
+    print('\n\nResponding...\n\n')
+    furhat.say(text=response, blocking=True)
 
 
 ### FURHAT SETUP
@@ -24,37 +26,16 @@ furhat.set_voice(name='Matthew')
 # Attend a specific location (x,y,z)
 furhat.attend(location="0.0,0.2,1.0")
 
-# furhat.say(text="Hello, my name is Anita!")
-
 for session in conversation_sessions:
     # Say "Hi there!"
-    furhat.say(text="Hi there! How are you {}?".format("feeling" if RUN_WITH_MEMORY else "doing"))
+    print('STARTING CONVO...\n\n')
+    furhat.say(blocking=True, text="Hi there! How are you {}?".format("feeling" if RUN_WITH_MEMORY else "doing"))
+
 
     while True:
-        # Listen to user speech and return ASR result; wait for 10 seconds
-        result = furhat.listen()
+        # Perform a named gesture
+        furhat.gesture(name="BrowRaise")
 
-        # Check if user said "bye" to break the loop
-        # TODO - make sure message ends with "bye"
-        if len(set(["bye", "goodbye"]).intersection(set(result.message.lower().split()))) > 0:
-            furhat.say(text="Goodbye!")
-            break
-
-
-        triples = extract_triples1(result.message)
-        triple_embeddings = triple_embedding(triples)
-        meta_data = metadata_embedding(triples)
-
-        print(triples)
-        print(triple_embeddings)
-        print(meta_data)
-
-
-        
-
-        # print the message
-        print(result.message)
-        
         # Perform a custom gesture
         furhat.gesture(body={
             "frames": [
@@ -68,7 +49,7 @@ for session in conversation_sessions:
                 },
                 {
                     "time": [
-                        0.67
+                        2.67
                     ],
                     "params": {
                         "reset": True
@@ -78,6 +59,27 @@ for session in conversation_sessions:
             "class": "furhatos.gestures.Gesture"
         })
 
+        # Listen to user speech and return ASR result; wait for 10 seconds
+        print("Listening...")
+        # TODO - ADD BEEP SOUND
+        result = furhat.listen()
+
+        # Check if user said "bye" to break the loop
+        # TODO - make sure message ends with "bye"
+        if len(set(["bye", "goodbye", "good-bye"]).intersection(set(result.message.lower().split()))) > 0:
+            furhat.say(text="Goodbye!", blocking=True)
+            break
+
+
+        # triples = extract_triples1(result.message)
+        # triple_embeddings = triple_embedding(triples)
+        # meta_data = metadata_embedding(triples)
+
+        # print(triples)
+        # print(triple_embeddings)
+        # print(meta_data)
+
+
 
         ###
         ###
@@ -85,14 +87,17 @@ for session in conversation_sessions:
         ###
         ###
         user_input = result.message
+        print(f'User Input: {user_input}')
         intent = getIntent(user_input)
+        print(f'Intent: {intent}')
         knowledge_base_info = None
         context = {}
 
         # check if if intent is within the scope of the agent
         if intent in RELEVANT_INTENTS:
+            print(f'Intent is relevant')
             knowledge_base_info = return_restaurants(get_query_params(user_input))
-            context['knowledge_base_info'] = knowledge_base_info
+            context['knowledge_base_info'] = ", ".join(knowledge_base_info)
             query = gen_query(context, user_input)
             response = ask_GPT(query)
             respond(response)

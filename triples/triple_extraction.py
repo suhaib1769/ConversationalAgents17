@@ -1,0 +1,156 @@
+import networkx as nx
+import itertools
+from sklearn.feature_extraction.text import CountVectorizer
+import matplotlib.pyplot as plt
+from cltl.triple_extraction.api import Chat
+from cltl.triple_extraction.cfg_analyzer import CFGAnalyzer
+from cltl.triple_extraction.utils.helper_functions import utterance_to_capsules
+import time
+from transformers import pipeline
+import numpy as np
+import nltk 
+import datetime
+import spacy 
+from nltk.sentiment.vader import SentimentIntensityAnalyzer
+import pandas as pd 
+from scipy.spatial.distance import cosine
+
+
+
+# create class for contextual memory
+class contextualMemory:
+    def __init__(self, name):
+        self.name = name
+        self.graph_memory = nx.Graph()
+        self.meta_memory = []
+    
+    def get_graph_memory(self):
+        return self.graph_memory
+    
+    def get_meta_memory(self):
+        return self.meta_memory
+
+ # Download the VADER lexicon
+nltk.download('all')
+# Create an instance of the SentimentIntensityAnalyzer
+sia = SentimentIntensityAnalyzer()
+
+# Function to conduct sentiment analysis on a sentence
+def analyze_sentiment(sentence):
+    sentiment_scores = sia.polarity_scores(sentence)
+    return sentiment_scores
+
+def extract_triples1(sentence):
+    chat = Chat("Leolani", "Lenka")
+    analyzer = CFGAnalyzer()
+
+    triples = []
+    # Get user input
+    user_input = sentence
+
+    sentiment = analyze_sentiment(user_input)
+
+    # check if the utterance is a question or statement
+    if '?' in user_input:
+        utterance_type = 'question'
+    else:
+        utterance_type = 'statement'
+
+
+    # Add user utterance to the chat
+    chat.add_utterance(user_input)
+
+    # Analyze utterance in context
+    analyzer.analyze_in_context(chat)
+
+    # Print triples extracted from the last utterance
+    # print(chat.last_utterance.triples)
+
+    # Iterate through each triple and extract the subject, predicate, and object
+    for utterance in chat.last_utterance.triples:
+        subject_label = utterance['subject']['label'] if 'subject' in utterance and 'label' in utterance['subject'] else "Unknown"
+        predicate_label = utterance['predicate']['label'] if 'predicate' in utterance and 'label' in utterance['predicate'] else "Unknown"
+        object_label = utterance['object']['label'] if 'object' in utterance and 'label' in utterance['object'] else "Unknown"
+        certainty_label = utterance['perspective']['certainty'] if 'perspective' in utterance and 'certainty' in utterance['perspective'] else "Unknown"
+        polarity_label = utterance['perspective']['polarity'] if 'perspective' in utterance and 'polarity' in utterance['perspective'] else "Unknown"
+        emotion_label = utterance['perspective']['emotion'] if 'perspective' in utterance and 'emotion' in utterance['perspective'] else "Unknown"
+        current_time = time.strftime("%H:%M:%S", time.localtime())
+        triple_dict = {
+            'triple' : (subject_label, predicate_label, object_label),  
+            'meta-data': (sentiment['compound'], certainty_label, polarity_label, emotion_label, current_time, utterance_type)
+        }
+        triples.append(triple_dict)       
+    
+    return triples
+
+def time_to_seconds(time_str):
+    time_obj = datetime.datetime.strptime(time_str, '%H:%M:%S')
+    return time_obj.hour * 3600 + time_obj.minute * 60 + time_obj.second
+
+def encode_label(label):
+    # Simple binary encoding for demonstration
+    return 1 if label == "statement" else 0
+
+def vectorize_meta_data(item):
+    vector = list(item[:4])  # First four numerical values
+    vector.append(time_to_seconds(item[4]))  # Convert time to seconds
+    vector.append(encode_label(item[5]))  # Encode the label
+    return vector
+
+# Load the spaCy model
+nlp = spacy.load("en_core_web_md")
+
+# Function to calculate cosine similarity using spaCy
+def calculate_similarity(str1, str2):
+    doc1 = nlp(str1)
+    doc2 = nlp(str2)
+    return doc1.similarity(doc2)
+
+
+def add_and_connect_node2(graph, new_triple, similarity_threshold=0.6):
+    """
+    Adds a new node to the graph and connects it to existing nodes based on similarity.
+    If the graph is initially empty, it just adds the node.
+
+    :param graph: The NetworkX graph to which the node is to be added.
+    :param new_triple: The new triple to be added as a node.
+    :param similarity_threshold: The threshold for cosine similarity to establish an edge.
+    """
+    # check if the new triple already exists in the graph
+    existing_triples = [data['triple'] for _, data in graph.nodes(data=True)]
+    if new_triple in existing_triples:
+        return graph
+    
+    # Create a new node ID
+    new_node_id = f"Triple_{len(graph.nodes)}"
+    graph.add_node(new_node_id, triple=new_triple)
+
+    # If the graph is not empty, attempt to connect the new node to existing nodes
+    if len(graph.nodes) == 0:
+        # add the first node to the graph
+        graph.add_node(new_node_id, triple=new_triple)
+    if len(graph.nodes) > 1:
+        for existing_node_id, existing_node_data in graph.nodes(data=True):
+            if existing_node_id != new_node_id:
+                for part_new, part_existing in itertools.product(new_triple, existing_node_data['triple']):
+                    if calculate_similarity(part_new, part_existing) > similarity_threshold:
+                        print(calculate_similarity(part_new, part_existing))
+                        graph.add_edge(new_node_id, existing_node_id)
+                        break  # Break if a connection is made to avoid multiple edges between same nodes
+
+    return graph
+
+def graph_extraction(graph, sentence):
+    most_similar_triple = max(graph.nodes(data=True), key=lambda x: max(calculate_similarity(sentence, part) for part in x[1]['triple']))[1]['triple']
+    return most_similar_triple
+
+def vectorised_meta_data_extraction(meta_data_list, new_meta_data):
+    length = len(meta_data_list)
+    print(meta_data_list)
+    print(new_meta_data)
+    # cosine similarity between the new triple and the vectorized meta-data to find the most similar meta-data
+    similarity_scores = [cosine_similarity([meta_data_list[i]], [new_meta_data]) for i in range(length)]
+    # find the index of the most similar meta-data
+    index = np.argmax(similarity_scores)
+    # return the most similar meta-data
+    return meta_data_list[index]

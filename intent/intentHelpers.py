@@ -6,6 +6,8 @@ import pickle
 from keras.models import load_model
 import pandas as pd
 
+from intent.dataframe import query_restaurants
+
 
 ### CLASSES THAT ABSTRACT THE CLASSIFICATION/LABELLING PROCESS
 # a class that takes in encoding/model components and returns the intent of a given text
@@ -174,16 +176,17 @@ def get_query_params(utterance):
 
 # get the restaurants given the query params
 def return_restaurants(query_params):
-    df = pd.read_csv('TA_restaurants_curated.csv')
+    df = pd.read_csv('intent/TA_restaurants_curated.csv')
     # encode the price range as a number from 1 to 4
     df['Price Range'] = df['Price Range'].replace('$', 1)
     df['Price Range'] = df['Price Range'].replace('$$', 2)
     df['Price Range'] = df['Price Range'].replace('$$ - $$$', 3)
     df['Price Range'] = df['Price Range'].replace('$$$$', 4)
     df['Cuisine Style'] = df['Cuisine Style'].apply(lambda x: eval(x) if pd.notnull(x) else [])
-    # restaurants = query_restaurants(df, query_params)
-    # names = restaurants['Name'].tolist()
-    return []
+    restaurants = query_restaurants(df, query_params)
+
+    names = restaurants[['Name', 'Price Range', 'Rating', 'City']].apply(lambda row: f"Restaurant with name: {row['Name']}, price range: {row['Price Range']}, rating: {row['Rating']}, in {row['City']}", axis=1).tolist()
+    return names
 
             
 

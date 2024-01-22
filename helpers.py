@@ -19,10 +19,15 @@ def gen_query(context, user_input):
     Given the context, give a response to the following prompt in one line: {}"""
     context_string = "\n".join([f'"{str(value)}"' for value in context.values()])
 
-    return query.format(context_string, user_input)
+    res = query.format(context_string, user_input)
+    print(f'Generated query: {res}')
+    return res
 
 #send the query to GPT API and get the response
 def ask_GPT(query):
+
+    print("\n\nQUERY FED TO GPT:\n{}\n\n".format(query))
+
     stream = client.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=[{"role": "user", "content": query}],
@@ -35,7 +40,8 @@ def ask_GPT(query):
         # Concatenate each chunk of content to the response_content variable
         response_content += chunk.choices[0].delta.content or ""
 
-    return response_content  # Return the accumulated response content
+    # TODO - REMOVE 150 CHAR CAP
+    return response_content[:150]  # Return the accumulated response content
 
 
 # create an episode from user memory
