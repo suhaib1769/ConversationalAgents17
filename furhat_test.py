@@ -26,6 +26,7 @@ while True:
     print(triple_embeddings)
     print(meta_data)
 
+
     # Check if user said "bye" to break the loop
     if result.message.lower() == "bye":
         furhat.say(text="Goodbye!")

@@ -129,3 +129,62 @@ def triple_embedding(triples):
     # nx.draw(G2, with_labels=True)
     # plt.show()
     return triple_list
+
+# add new triple function to knowledge graph
+def add_new_triple(triple):
+    # get the subject, predicate, and object from the triple
+    subject = triple[0]
+    predicate = triple[1]
+    object = triple[2]
+
+    # check if the subject is already in the graph
+    if subject in G.nodes:
+        # check if the predicate is already in the graph
+        if predicate in G.nodes:
+            # check if the object is already in the graph
+            if object in G.nodes:
+                # add the triple to the graph
+                G.add_edge(subject, object, predicate=predicate)
+            else:
+                # add the object to the graph
+                G.add_node(object)
+                # add the triple to the graph
+                G.add_edge(subject, object, predicate=predicate)
+        else:
+            # add the predicate to the graph
+            G.add_node(predicate)
+            # check if the object is already in the graph
+            if object in G.nodes:
+                # add the triple to the graph
+                G.add_edge(subject, object, predicate=predicate)
+            else:
+                # add the object to the graph
+                G.add_node(object)
+                # add the triple to the graph
+                G.add_edge(subject, object, predicate=predicate)
+    else:
+        # add the subject to the graph
+        G.add_node(subject)
+        # check if the predicate is already in the graph
+        if predicate in G.nodes:
+            # check if the object is already in the graph
+            if object in G.nodes:
+                # add the triple to the graph
+                G.add_edge(subject, object, predicate=predicate)
+            else:
+                # add the object to the graph
+                G.add_node(object)
+                # add the triple to the graph
+                G.add_edge(subject, object, predicate=predicate)
+        else:
+            # add the predicate to the graph
+            G.add_node(predicate)
+            # check if the object is already in the graph
+            if object in G.nodes:
+                # add the triple to the graph
+                G.add_edge(subject, object, predicate=predicate)
+            else:
+                # add the object to the graph
+                G.add_node(object)
+                # add the triple to the graph
+                G.add_edge(subject, object, predicate=predicate)
