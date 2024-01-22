@@ -1,4 +1,5 @@
 from furhat_remote_api import FurhatRemoteAPI
+from triples.triple import extract_triples1, triple_embedding, metadata_embedding
 
 # Create an instance of the FurhatRemoteAPI class, providing the address of the robot or the SDK running the virtual robot
 furhat = FurhatRemoteAPI("localhost")
@@ -9,22 +10,29 @@ furhat.set_voice(name='Matthew')
 # Attend a specific location (x,y,z)
 furhat.attend(location="0.0,0.2,1.0")
 
-furhat.say(text="Hello, my name is Anita!")
+# furhat.say(text="Hello, my name is Anita!")
 
 while True:
     # Say "Hi there!"
-    # furhat.say(text="Hi there!")
+    furhat.say(text="Hi there!")
 
-    # Listen to user speech and return ASR result
+    # Listen to user speech and return ASR result; wait for 10 seconds
     result = furhat.listen()
+    triples = extract_triples1(result.message)
+    triple_embeddings = triple_embedding(triples)
+    meta_data = metadata_embedding(triples)
 
-    # print the message
-    print(result.message)
+    print(triples)
+    print(triple_embeddings)
+    print(meta_data)
 
     # Check if user said "bye" to break the loop
     if result.message.lower() == "bye":
         furhat.say(text="Goodbye!")
         break
+
+    # print the message
+    print(result.message)
     
     # Perform a custom gesture
     furhat.gesture(body={
@@ -49,7 +57,7 @@ while True:
         "class": "furhatos.gestures.Gesture"
     })
     
-    furhat.say(result.message)
+    # furhat.say(result.message)
 
     # Perform a named gesture
     furhat.gesture(name="BrowRaise")
