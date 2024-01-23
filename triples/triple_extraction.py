@@ -1,6 +1,7 @@
 import networkx as nx
 import itertools
 from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 import matplotlib.pyplot as plt
 from cltl.triple_extraction.api import Chat
 from cltl.triple_extraction.cfg_analyzer import CFGAnalyzer
@@ -19,10 +20,11 @@ from scipy.spatial.distance import cosine
 
 # create class for contextual memory
 class contextualMemory:
-    def __init__(self, name):
-        self.name = name
+    def __init__(self, Agent, User):
         self.graph_memory = nx.Graph()
         self.meta_memory = []
+        self.chat = Chat(Agent, User)
+        self.analyzer = CFGAnalyzer()
     
     def get_graph_memory(self):
         return self.graph_memory
@@ -40,9 +42,9 @@ def analyze_sentiment(sentence):
     sentiment_scores = sia.polarity_scores(sentence)
     return sentiment_scores
 
-def extract_triples1(sentence):
-    chat = Chat("Leolani", "Lenka")
-    analyzer = CFGAnalyzer()
+def extract_triples1(sentence, chat, analyzer):
+    chat = chat
+    analyzer = analyzer
 
     triples = []
     # Get user input
@@ -146,8 +148,6 @@ def graph_extraction(graph, sentence):
 
 def vectorised_meta_data_extraction(meta_data_list, new_meta_data):
     length = len(meta_data_list)
-    print(meta_data_list)
-    print(new_meta_data)
     # cosine similarity between the new triple and the vectorized meta-data to find the most similar meta-data
     similarity_scores = [cosine_similarity([meta_data_list[i]], [new_meta_data]) for i in range(length)]
     # find the index of the most similar meta-data
