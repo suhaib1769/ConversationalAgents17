@@ -1,14 +1,14 @@
 from furhat_remote_api import FurhatRemoteAPI
 from helpers import *
 from intent.intentHelpers import get_query_params, getIntent, return_restaurants
+from queries import *
 from triples.triple import extract_triples1, triple_embedding, metadata_embedding
 from triples.triple_extraction import *
-import logging
 
 
 
 ### helper functions & variables
-RUN_WITH_MEMORY = True
+RUN_WITH_MEMORY = False
 conversation_sessions = ['only_short_term', 'short_and_long_term']
 
 # have furhat respond to the query
@@ -100,7 +100,7 @@ for session in conversation_sessions:
             
             knowledge_base_info = return_restaurants(get_query_params(user_input))
             context['knowledge_base_info'] = ", ".join(knowledge_base_info)
-            query = gen_query(context, user_input)
+            query = gen_restaurant_finder_query(context)
             response = ask_GPT(query)
             respond(response)
 
@@ -139,7 +139,7 @@ for session in conversation_sessions:
                         cm.graph_memory = add_and_connect_node2(cm.graph_memory, triple)
                         cm.meta_memory.append(vectorized_metadata)
 
-                query = gen_query(context, user_input) if RUN_WITH_MEMORY else user_input
+                query = gen_contextual_query(context, user_input) if RUN_WITH_MEMORY else user_input
                 response = ask_GPT(query)
                 respond(response)
 

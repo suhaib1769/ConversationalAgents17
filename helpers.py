@@ -10,19 +10,6 @@ client = OpenAI(
 RELEVANT_INTENTS = ['meal_suggestion', 'restaurant_suggestion', 'travel_suggestion']
 
 
-# generate a query from the context to be passed to the LLM
-def gen_query(context, user_input):
-    
-    query = """You are talking to a user. Here is some context about the user for your response:
-    {}
-    
-    Given the context, give a response to the following prompt in one line: {}"""
-    context_string = "\n".join([f'"{str(value)}"' for value in context.values()])
-
-    res = query.format(context_string, user_input)
-    print(f'Generated query: {res}')
-    return res
-
 #send the query to GPT API and get the response
 def ask_GPT(query):
 
