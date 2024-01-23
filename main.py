@@ -10,7 +10,7 @@ from os import system
 
 
 ### helper functions & variables
-RUN_WITH_MEMORY = False
+RUN_WITH_MEMORY = True
 conversation_sessions = ['only_short_term', 'short_and_long_term']
 
 # have furhat respond to the query
@@ -94,7 +94,7 @@ for session in conversation_sessions:
         })
 
         # Listen to user speech and return ASR result; wait for 10 seconds
-        system('afplay /System/Library/Sounds/Glass.aiff')
+        # system('afplay /System/Library/Sounds/Glass.aiff')
         print("Listening...")
         result = furhat.listen()
 
@@ -111,6 +111,9 @@ for session in conversation_sessions:
         ###
         user_input = result.message
         print(f'User Input: {user_input}')
+        if user_input == '':
+            # furhat.say(text="Sorry, did you say something?", blocking=True)
+            continue
         intent = getIntent(user_input)
         print(f'Intent: {intent}')
         knowledge_base_info = None
@@ -132,18 +135,27 @@ for session in conversation_sessions:
         else:
             # check if the utterance is a question or statement
             if isQ.predict_question(user_input) == 1:
+                print('a')
                 if intent == 'oos':
+                    print('b')
                     intent_string = intent.replace('_', ' ')
                     respond("Sorry, as a restaurant booking agent I cannot answer specific questions about {}.".format(intent_string))
                 else:
+                    print('c')
                     response = ask_GPT(user_input)
                     respond(response)
             else:
                 # add the user's input to the memory as a new episode
-
+                print('d')
                 if RUN_WITH_MEMORY:
+                    print('e')
                     context = contextFromMemory(context, user_input, cm)
+                    print("context: ", context)
+                    if context == None:
+                        context = {}
+                        context['knowledge_base_info'] = "No context"
                 query = gen_contextual_query(context, user_input) if RUN_WITH_MEMORY else user_input
+                print('g')
                 response = ask_GPT(query)
                 respond(response)
 

@@ -106,6 +106,8 @@ def vectorize_meta_data(item):
     vector = list(item[:4])  # First four numerical values
     vector.append(time_to_seconds(item[4]))  # Convert time to seconds
     vector.append(encode_label(item[5]))  # Encode the label
+    # if any of the values are unknown, convert them to 0
+    vector = [0 if x == "Unknown" else x for x in vector]
     return vector
 
 # Load the spaCy model
