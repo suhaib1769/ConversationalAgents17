@@ -10,7 +10,7 @@ from os import system
 
 
 ### helper functions & variables
-RUN_WITH_MEMORY = False
+RUN_WITH_MEMORY = True
 conversation_sessions = ['only_short_term', 'short_and_long_term']
 
 # have furhat respond to the query
@@ -67,10 +67,17 @@ for session in conversation_sessions:
     # Say "Hi there!"
     print('STARTING CONVO...\n\n')
     furhat.say(blocking=True, text="Hi there! How are you {}?".format("feeling" if RUN_WITH_MEMORY else "doing"))
-
+    furhat.say(blocking=True, text="""
+               I'm a restaurant booking agent. I can help you find a restaurant and make a reservation. 
+               You can give me some of the following information such as the city or cuisine. 
+               Even the name of the restaurant! And if I know it, I can try and provide some information about it for you. 
+               You can also ask me questions about the restaurant, such as 'Is it expensive?' or 'Is it kid friendly?
+               Remember, I may or may not be able to remember information you give me, so give me information about yourself and I'll try to remember it.
+               At the end you can simply say 'bye' to exit the conversation.
+               Remember to speak only after you hear the ring!
+               So, what can I do for you?""")
 
     while True:
-
         # Listen to user speech and return ASR result; wait for 10 seconds
         system('afplay /System/Library/Sounds/Glass.aiff')
         print("Listening...")
@@ -165,12 +172,13 @@ for session in conversation_sessions:
             # check if the utterance is a question or statement
             if isQ.predict_question(user_input) == 1:
                 print('a')
-                if intent != 'oos':
+                if intent == 'oos':
                     print('b')
                     intent_string = intent.replace('_', ' ')
                     respond("Sorry, as a restaurant booking agent I cannot answer specific questions about {}.".format(intent_string))
                 else:
                     print('c')
+                    query = gen_generic_query(user_input)
                     response = ask_GPT(user_input)
                     respond(response)
             else:

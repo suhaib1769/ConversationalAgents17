@@ -41,6 +41,6 @@ def query_restaurants(dataframe, query_params, default_city=None, max_results=10
         print('Found {} results.'.format(filtered_df.shape[0]))
 
     # return at most 3 results
-    return filtered_df.head(3)
+    return filtered_df.head(2)
 
 
