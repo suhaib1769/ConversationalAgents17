@@ -7,7 +7,7 @@ client = OpenAI(
 )
 
 ### helper functions & variables
-RELEVANT_INTENTS = ['meal_suggestion', 'restaurant_suggestion', 'travel_suggestion', 'restaurant_reservation', 'accept_reservation', 'cancel_reservation', 'confirm_reservation']
+RELEVANT_INTENTS = ['meal_suggestion', 'restaurant_suggestion', 'travel_suggestion', 'restaurant_reservation', 'confirm_reservation', 'accept_reservation', 'cancel_reservation']
 
 
 #send the query to GPT API and get the response
@@ -27,8 +27,8 @@ def ask_GPT(query):
         # Concatenate each chunk of content to the response_content variable
         response_content += chunk.choices[0].delta.content or ""
 
-    # TODO - REMOVE 150 CHAR CAP
-    return response_content[:150]  # Return the accumulated response content
+    # TODO - REMOVE CHAR CAP
+    return response_content[:200]  # Return the accumulated response content
 
 
 # create an episode from user memory

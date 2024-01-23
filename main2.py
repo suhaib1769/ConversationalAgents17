@@ -10,7 +10,7 @@ from os import system
 
 
 ### helper functions & variables
-RUN_WITH_MEMORY = True
+RUN_WITH_MEMORY = False
 conversation_sessions = ['only_short_term', 'short_and_long_term']
 
 # have furhat respond to the query
@@ -57,7 +57,6 @@ furhat.attend(location="0.0,0.2,1.0")
 cm = contextualMemory('Furhat', 'User')
 isQ = IsQuestion()
 
-
 for session in conversation_sessions:
 
     # allow user to start session
@@ -101,8 +100,9 @@ for session in conversation_sessions:
             ],
             "class": "furhatos.gestures.Gesture"
         })
-        print('\nSTOPPED Listening\n\n')
+        print('STOPPED Listening\n\n')
         furhat.listen_stop()
+
 
         # Check if user said "bye" to break the loop
         # TODO - make sure message ends with "bye"
@@ -117,10 +117,9 @@ for session in conversation_sessions:
         ###
         user_input = result.message
         print(f'User Input: {user_input}')
-        if user_input == '':
-            # furhat.say(text="Sorry, did you say something?", blocking=True)
-            continue
         intent = getIntent(user_input)
+        if user_input == '':
+            continue
         print(f'Intent: {intent}')
         knowledge_base_info = None
         context = {}
@@ -128,7 +127,7 @@ for session in conversation_sessions:
 
         # check if if intent is within the scope of the agent
         if intent in RELEVANT_INTENTS:
-            print(f'Intent is relevant')
+            print(f'\n\nINTENT IS: {intent}\n\n')
             if RUN_WITH_MEMORY and isQ.predict_question(user_input) == 0:
                 context = contextFromMemory(context, user_input, cm)
 
@@ -150,28 +149,18 @@ for session in conversation_sessions:
         else:
             # check if the utterance is a question or statement
             if isQ.predict_question(user_input) == 1:
-                print('a')
                 if intent == 'oos':
-                    print('b')
                     intent_string = intent.replace('_', ' ')
                     respond("Sorry, as a restaurant booking agent I cannot answer specific questions about {}.".format(intent_string))
                 else:
-                    print('c')
                     response = ask_GPT(user_input)
                     respond(response)
             else:
                 # add the user's input to the memory as a new episode
-                print('d')
+
                 if RUN_WITH_MEMORY:
-                    print('e')
                     context = contextFromMemory(context, user_input, cm)
-                    print("context: ", context)
-                    if context == None:
-                        context = {}
-                        context['knowledge_base_info'] = "No context"
-                        
                 query = gen_contextual_query(context, user_input) if RUN_WITH_MEMORY else user_input
-                print('g')
                 response = ask_GPT(query)
                 respond(response)
 

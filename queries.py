@@ -27,26 +27,19 @@ def gen_restaurant_finder_query(context):
 # generate a query from the context to be passed to the LLM
 def gen_restaurant_booker_query(context, user_input):
     
-    query = """You are talking to a user. Here is some context about the user for your response:
-    {}
-    
-    Given the context, give a response to the following prompt in one line: {}"""
-    context_string = "\n".join([f'"{str(value)}"' for value in context.values()])
+    query = f"""You are a restaurant booking agent who speaks with the human, so format the answer as if it is oral, not written. 
+    The only follow up question should be to ask them to confirm it or when they'd like it. 
+    Answer the user's command: {user_input}"""
 
-    res = query.format(context_string, user_input)
-    print(f'Generated query: {res}')
-    return res
+    print(f'Generated query: {query}')
+    return query
 
 
 # generate a query from the context to be passed to the LLM
-def gen_reservation_confirmation_query(context, user_input):
+def gen_reservation_query(context, user_input):
     
-    query = """You are talking to a user. Here is some context about the user for your response:
-    {}
-    
-    Given the context, give a response to the following prompt in one line: {}"""
-    context_string = "\n".join([f'"{str(value)}"' for value in context.values()])
+    query = f"""You are a restaurant booking agent who speaks with the human, so format the answer as if it is oral, not written.
+    Answer the user's command: {user_input}"""
 
-    res = query.format(context_string, user_input)
-    print(f'Generated query: {res}')
-    return res
+    print(f'Generated query: {query}')
+    return query
