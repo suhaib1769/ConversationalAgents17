@@ -13,7 +13,7 @@ def gen_contextual_query(context, user_input):
 
 
 # generate a query from the context to be passed to the LLM
-def gen_restaurant_finder_query(context, user_input):
+def gen_restaurant_finder_query(context):
     
     query = f"""
     You are a restaurant booking agent who speaks with the human, so format the answer as if it is oral, not written. Here are three restaurants the user could like: Restaurant with name: {context['knowledge_base_info']}

@@ -7,7 +7,7 @@ client = OpenAI(
 )
 
 ### helper functions & variables
-RELEVANT_INTENTS = ['meal_suggestion', 'restaurant_suggestion', 'travel_suggestion']
+RELEVANT_INTENTS = ['meal_suggestion', 'restaurant_suggestion', 'travel_suggestion', 'restaurant_reservation', 'accept_reservation', 'cancel_reservation', 'confirm_reservation']
 
 
 #send the query to GPT API and get the response

@@ -185,7 +185,7 @@ def return_restaurants(query_params):
     df['Cuisine Style'] = df['Cuisine Style'].apply(lambda x: eval(x) if pd.notnull(x) else [])
     restaurants = query_restaurants(df, query_params)
 
-    names = restaurants[['Name', 'Price Range', 'Rating', 'City']].apply(lambda row: f"Restaurant called {row['Name']}, price range: {int(row['Price Range'])}, rating: {row['Rating']}, located in the city of {row['City']}", axis=1).tolist()
+    names = restaurants[['Name', 'Price Range', 'Rating', 'City']].apply(lambda row: f"Restaurant called {row['Name']}, price range: {int(row['Price Range'])}, rating: {row['Rating']}, located in the city of {row['City']}", axis=1).values.tolist()
     return names
 
             

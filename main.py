@@ -94,8 +94,8 @@ for session in conversation_sessions:
         })
 
         # Listen to user speech and return ASR result; wait for 10 seconds
-        print("Listening...")
         system('afplay /System/Library/Sounds/Glass.aiff')
+        print("Listening...")
         result = furhat.listen()
 
         # Check if user said "bye" to break the loop
