@@ -36,6 +36,7 @@ Thumbs.db
 # Ignore large and generated files
 ASR_test/*.wav
 intent/*.txt
+triples/test.ipynb
 
 # Ignore Python cache files
 __pycache__/

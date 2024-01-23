@@ -143,11 +143,16 @@ def add_and_connect_node2(graph, new_triple, similarity_threshold=0.6):
     return graph
 
 def graph_extraction(graph, sentence):
+    # if graph is empty, return "memory empty"
+    if len(graph.nodes) == 0:
+        return "memory empty"
     most_similar_triple = max(graph.nodes(data=True), key=lambda x: max(calculate_similarity(sentence, part) for part in x[1]['triple']))[1]['triple']
     return most_similar_triple
 
-def vectorised_meta_data_extraction(meta_data_list, new_meta_data):
+def vectorized_meta_data_extraction(meta_data_list, new_meta_data):
     length = len(meta_data_list)
+    if length == 0:
+        return "memory empty"
     # cosine similarity between the new triple and the vectorized meta-data to find the most similar meta-data
     similarity_scores = [cosine_similarity([meta_data_list[i]], [new_meta_data]) for i in range(length)]
     # find the index of the most similar meta-data
