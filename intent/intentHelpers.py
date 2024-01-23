@@ -176,17 +176,20 @@ def get_query_params(utterance):
 
 # get the restaurants given the query params
 def return_restaurants(query_params):
-    df = pd.read_csv('intent/TA_restaurants_curated.csv')
-    # encode the price range as a number from 1 to 4
-    df['Price Range'] = df['Price Range'].replace('$', 1)
-    df['Price Range'] = df['Price Range'].replace('$$', 2)
-    df['Price Range'] = df['Price Range'].replace('$$ - $$$', 3)
-    df['Price Range'] = df['Price Range'].replace('$$$$', 4)
-    df['Cuisine Style'] = df['Cuisine Style'].apply(lambda x: eval(x) if pd.notnull(x) else [])
-    restaurants = query_restaurants(df, query_params)
+    try:
+        df = pd.read_csv('intent/TA_restaurants_curated.csv')
+        # encode the price range as a number from 1 to 4
+        df['Price Range'] = df['Price Range'].replace('$', 1)
+        df['Price Range'] = df['Price Range'].replace('$$', 2)
+        df['Price Range'] = df['Price Range'].replace('$$ - $$$', 3)
+        df['Price Range'] = df['Price Range'].replace('$$$$', 4)
+        df['Cuisine Style'] = df['Cuisine Style'].apply(lambda x: eval(x) if pd.notnull(x) else [])
+        restaurants = query_restaurants(df, query_params)
 
-    names = restaurants[['Name', 'Price Range', 'Rating', 'City']].apply(lambda row: f"Restaurant called {row['Name']}, price range: {int(row['Price Range'])}, rating: {row['Rating']}, located in the city of {row['City']}", axis=1).values.tolist()
-    return names
+        names = restaurants[['Name', 'Price Range', 'Rating', 'City']].apply(lambda row: f"Restaurant called {row['Name']}, price range: {int(row['Price Range']) if pd.notnull(row['Price Range']) else 'unknown'}, rating: {row['Rating'] if pd.notnull(row['Rating']) else 'unknown'}, located in the city of {row['City'] if pd.notnull(row['City']) else 'unknown'}", axis=1).values.tolist()
+        return names
+    except:
+        return []
 
             
 
