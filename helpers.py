@@ -28,7 +28,7 @@ def ask_GPT(query):
         response_content += chunk.choices[0].delta.content or ""
 
     # TODO - REMOVE CHAR CAP
-    return response_content[:200]  # Return the accumulated response content
+    return response_content  # Return the accumulated response content
 
 
 # create an episode from user memory

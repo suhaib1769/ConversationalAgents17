@@ -10,7 +10,7 @@ from os import system
 
 
 ### helper functions & variables
-RUN_WITH_MEMORY = True
+RUN_WITH_MEMORY = False
 conversation_sessions = ['only_short_term', 'short_and_long_term']
 
 # have furhat respond to the query
@@ -131,6 +131,9 @@ for session in conversation_sessions:
             print(f'Intent is relevant')
             if RUN_WITH_MEMORY and isQ.predict_question(user_input) == 0:
                 context = contextFromMemory(context, user_input, cm)
+                if context == None:
+                    context = {}
+                    context['knowledge_base_info'] = "No context"
 
             knowledge_base_info = return_restaurants(get_query_params(user_input))
             context['knowledge_base_info'] = ", ".join(knowledge_base_info)
@@ -138,6 +141,17 @@ for session in conversation_sessions:
 
             if intent in ['restaurant_reservation', 'accept_reservation']:
                 query = gen_restaurant_booker_query(context, user_input)
+                response = ask_GPT(query)
+                respond(response)
+
+                # Listen to user speech and return ASR result; wait for 10 seconds
+                system('afplay /System/Library/Sounds/Glass.aiff')
+                print("Listening...")
+                result = furhat.listen()
+                user_input = result.message
+
+                query = gen_reservation_query(user_input=user_input)
+
             elif intent in ['confirm_reservation', 'cancel_reservation']:
                 query = gen_reservation_query(user_input=user_input)
             else:
@@ -151,7 +165,7 @@ for session in conversation_sessions:
             # check if the utterance is a question or statement
             if isQ.predict_question(user_input) == 1:
                 print('a')
-                if intent == 'oos':
+                if intent != 'oos':
                     print('b')
                     intent_string = intent.replace('_', ' ')
                     respond("Sorry, as a restaurant booking agent I cannot answer specific questions about {}.".format(intent_string))

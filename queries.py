@@ -36,7 +36,7 @@ def gen_restaurant_booker_query(context, user_input):
 
 
 # generate a query from the context to be passed to the LLM
-def gen_reservation_query(context, user_input):
+def gen_reservation_query(user_input):
     
     query = f"""You are a restaurant booking agent who speaks with the human, so format the answer as if it is oral, not written.
     Answer the user's command: {user_input}"""
