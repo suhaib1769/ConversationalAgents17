@@ -4,6 +4,7 @@ from intent.intentHelpers import get_query_params, getIntent, return_restaurants
 from queries import *
 from triples.triple import extract_triples1, triple_embedding, metadata_embedding
 from triples.triple_extraction import *
+from os import system
 
 
 
@@ -29,6 +30,9 @@ furhat.set_voice(name='Matthew')
 furhat.attend(location="0.0,0.2,1.0")
 
 cm = contextualMemory('Furhat', 'User')
+
+print("Press ENTER to start...")
+input()
 
 for session in conversation_sessions:
     # Say "Hi there!"
@@ -65,7 +69,7 @@ for session in conversation_sessions:
 
         # Listen to user speech and return ASR result; wait for 10 seconds
         print("Listening...")
-        # TODO - ADD BEEP SOUND
+        system('afplay /System/Library/Sounds/Glass.aiff')
         result = furhat.listen()
 
         # Check if user said "bye" to break the loop
