@@ -143,6 +143,7 @@ for session in conversation_sessions:
                     context['knowledge_base_info'] = "No context"
 
             knowledge_base_info = return_restaurants(get_query_params(user_input))
+            print(f'restaurants: {knowledge_base_info}')
             context['knowledge_base_info'] = ", ".join(knowledge_base_info)
             print(f'Context: {context}')
 
