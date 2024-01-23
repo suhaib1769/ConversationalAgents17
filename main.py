@@ -4,6 +4,7 @@ from intent.intentHelpers import get_query_params, getIntent, return_restaurants
 from queries import *
 from triples.triple import extract_triples1, triple_embedding, metadata_embedding
 from triples.triple_extraction import *
+from question import *
 from os import system
 
 
@@ -18,6 +19,30 @@ def respond(response):
     print(response)
     furhat.say(text=response, blocking=True)
 
+def contextFromMemory(context, user_input, cm):
+    extracted_triple = extract_triples1(user_input, cm.chat, cm.analyzer)
+    print(extracted_triple)
+    if extracted_triple != []:
+        triple = extracted_triple[0]['triple']
+        metadata = extracted_triple[0]['meta-data']
+        vectorized_metadata = vectorize_meta_data(metadata)
+
+        print(f'Triple: {triple}')
+        print(f'Metadata: {metadata}')
+
+        # extract relevant information from the user's memory
+        extracted_grand_context = graph_extraction(cm.graph_memory, user_input)
+        if extracted_grand_context != "memory empty":
+            context['grand_context'] = extracted_grand_context
+        extracted_sub_context = vectorized_meta_data_extraction(cm.meta_memory, vectorized_metadata)
+        if extracted_sub_context != "memory empty":
+            context['sub_context'] = extracted_sub_context
+
+        cm.add_graph_memory(triple)
+        cm.add_meta_memory(vectorized_metadata)
+
+        return context
+
 
 ### FURHAT SETUP
 # Create an instance of the FurhatRemoteAPI class, providing the address of the robot or the SDK running the virtual robot
@@ -30,6 +55,7 @@ furhat.set_voice(name='Matthew')
 furhat.attend(location="0.0,0.2,1.0")
 
 cm = contextualMemory('Furhat', 'User')
+isQ = IsQuestion()
 
 print("Press ENTER to start...")
 input()
@@ -93,17 +119,11 @@ for session in conversation_sessions:
         # check if if intent is within the scope of the agent
         if intent in RELEVANT_INTENTS:
             print(f'Intent is relevant')
-            if RUN_WITH_MEMORY:
-                # extract relevant information from the user's memory
-                extracted_grand_context = graph_extraction(cm.graph_memory, user_input)
-                if extracted_grand_context != "memory empty":
-                    context['grand_context'] = extracted_grand_context
-                extracted_sub_context = vectorized_meta_data_extraction(cm.meta_memory, vectorized_metadata)
-                if extracted_sub_context != "memory empty":
-                    context['sub_context'] = extracted_sub_context
-            
+            if RUN_WITH_MEMORY and isQ.predict_question(user_input) == 0:
+                context = contextFromMemory(context, user_input, cm)
             knowledge_base_info = return_restaurants(get_query_params(user_input))
             context['knowledge_base_info'] = ", ".join(knowledge_base_info)
+            print(f'Context: {context}')
             query = gen_restaurant_finder_query(context)
             response = ask_GPT(query)
             respond(response)
@@ -111,7 +131,7 @@ for session in conversation_sessions:
         # the intent is not within the scope of the agent
         else:
             # check if the utterance is a question or statement
-            if '?' in user_input:
+            if isQ.predict_question(user_input) == 1:
                 if intent == 'oos':
                     intent_string = intent.replace('_', ' ')
                     respond("Sorry, as a restaurant booking agent I cannot answer specific questions about {}.".format(intent_string))
@@ -122,27 +142,7 @@ for session in conversation_sessions:
                 # add the user's input to the memory as a new episode
 
                 if RUN_WITH_MEMORY:
-                    extracted_triple = extract_triples1(user_input, cm.chat, cm.analyzer)
-                    print(extracted_triple)
-                    if extracted_triple != []:
-                        triple = extracted_triple[0]['triple']
-                        metadata = extracted_triple[0]['meta-data']
-                        vectorized_metadata = vectorize_meta_data(metadata)
-
-                        print(f'Triple: {triple}')
-                        print(f'Metadata: {metadata}')
-
-                        # extract relevant information from the user's memory
-                        extracted_grand_context = graph_extraction(cm.graph_memory, user_input)
-                        if extracted_grand_context != "memory empty":
-                            context['grand_context'] = extracted_grand_context
-                        extracted_sub_context = vectorized_meta_data_extraction(cm.meta_memory, vectorized_metadata)
-                        if extracted_sub_context != "memory empty":
-                            context['sub_context'] = extracted_sub_context
-
-                        cm.graph_memory = add_and_connect_node2(cm.graph_memory, triple)
-                        cm.meta_memory.append(vectorized_metadata)
-
+                    context = contextFromMemory(context, user_input, cm)
                 query = gen_contextual_query(context, user_input) if RUN_WITH_MEMORY else user_input
                 response = ask_GPT(query)
                 respond(response)

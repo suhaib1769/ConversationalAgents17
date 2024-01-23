@@ -25,6 +25,15 @@ class contextualMemory:
         self.meta_memory = []
         self.chat = Chat(Agent, User)
         self.analyzer = CFGAnalyzer()
+
+    def add_graph_memory(self, new_triple):
+        self.graph_memory = add_and_connect_node2(self.graph_memory, new_triple)
+
+    def add_meta_memory(self, new_meta_data):
+        # keep memory at size 5 only, if memory is full, remove the oldest memory
+        if len(self.meta_memory) == 5:
+            self.meta_memory.pop(0)
+        self.meta_memory.append(new_meta_data)
     
     def get_graph_memory(self):
         return self.graph_memory
