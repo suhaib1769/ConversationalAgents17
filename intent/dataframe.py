@@ -1,4 +1,4 @@
-def query_restaurants(dataframe, query_params, default_city=None, max_results=10):
+def query_restaurants(dataframe, query_params, default_city="Amsterdam", max_results=10):
     """
     Query the restaurant dataset based on various tags.
     

@@ -154,11 +154,43 @@ def add_and_connect_node2(graph, new_triple, similarity_threshold=0.6):
     return graph
 
 def graph_extraction(graph, sentence):
+     # if graph is empty, return "memory empty"
+    if len(graph.nodes) == 0:
+        return "memory empty"
+    # Modify the function to compare the sentence with the entire triple as a single string
+    most_similar_triple = max(graph.nodes(data=True), key=lambda x: calculate_similarity(sentence, ' '.join(x[1]['triple'])))[1]['triple']
+    return most_similar_triple
+
+def graph_extraction2(graph, sentence):
     # if graph is empty, return "memory empty"
     if len(graph.nodes) == 0:
         return "memory empty"
-    most_similar_triple = max(graph.nodes(data=True), key=lambda x: max(calculate_similarity(sentence, part) for part in x[1]['triple']))[1]['triple']
-    return most_similar_triple
+    
+    highest_similarity = 0
+    most_similar_triple = None
+
+    # Iterate over each node in the graph
+    for node in graph.nodes(data=True):
+        # Concatenate the elements of the triple
+        triple_string = ' '.join(node[1]['triple'])
+        # remove '-' from the triple string
+        triple_string = triple_string.replace('-', ' ')
+        
+        # Calculate similarity
+        similarity = calculate_similarity(sentence, triple_string)
+
+        # Print the two strings and their similarity score
+        print(f"Sentence: {sentence}")
+        print(f"Triple: {triple_string}")
+        print(f"Similarity: {similarity}\n")
+
+        # Check if this is the most similar triple so far
+        if similarity > highest_similarity:
+            highest_similarity = similarity
+            most_similar_triple = node[1]['triple']
+
+    return most_similar_triple if most_similar_triple else "No similar triple found"
+
 
 def vectorized_meta_data_extraction(meta_data_list, new_meta_data):
     length = len(meta_data_list)

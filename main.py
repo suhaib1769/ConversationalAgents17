@@ -67,15 +67,15 @@ for session in conversation_sessions:
     # Say "Hi there!"
     print('STARTING CONVO...\n\n')
     furhat.say(blocking=True, text="Hi there! How are you {}?".format("feeling" if RUN_WITH_MEMORY else "doing"))
-    furhat.say(blocking=True, text="""
-               I'm a restaurant booking agent. I can help you find a restaurant and make a reservation. 
-               You can give me some of the following information such as the city or cuisine. 
-               Even the name of the restaurant! And if I know it, I can try and provide some information about it for you. 
-               You can also ask me questions about the restaurant, such as 'Is it expensive?' or 'Is it kid friendly?
-               Remember, I may or may not be able to remember information you give me, so give me information about yourself and I'll try to remember it.
-               At the end you can simply say 'bye' to exit the conversation.
-               Remember to speak only after you hear the ring!
-               So, what can I do for you?""")
+    # furhat.say(blocking=True, text="""
+    #            I'm a restaurant booking agent. I can help you find a restaurant and make a reservation. 
+    #            You can give me some of the following information such as the city or cuisine. 
+    #            Even the name of the restaurant! And if I know it, I can try and provide some information about it for you. 
+    #            You can also ask me questions about the restaurant, such as 'Is it expensive?' or 'Is it kid friendly?
+    #            Remember, I may or may not be able to remember information you give me, so give me information about yourself and I'll try to remember it.
+    #            At the end you can simply say 'bye' to exit the conversation.
+    #            Remember to speak only after you hear the ring!
+    #            So, what can I do for you?""")
 
     while True:
         # Listen to user speech and return ASR result; wait for 10 seconds
