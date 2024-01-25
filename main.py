@@ -28,20 +28,20 @@ def contextFromMemory(context, user_input, cm):
         print(f'Triple: {triple}')
         print(f'Metadata: {metadata}')
 
-        # extract relevant information from the user's memory
-        extracted_grand_context = graph_extraction2(cm.graph_memory, user_input)
-        if extracted_grand_context != "memory empty":
-            context['grand_context'] = extracted_grand_context
-        extracted_sub_context = vectorized_meta_data_extraction(cm.meta_memory, vectorized_metadata)
-        if extracted_sub_context != "memory empty":
-            context['sub_context'] = extracted_sub_context
-
+    # extract relevant information from the user's memory
+    extracted_grand_context = graph_extraction2(cm.graph_memory, user_input)
+    if extracted_grand_context != "memory empty":
+        context['grand_context'] = extracted_grand_context
+        # extracted_sub_context = vectorized_meta_data_extraction(cm.meta_memory, vectorized_metadata)
+        # if extracted_sub_context != "memory empty":
+        #     context['sub_context'] = extracted_sub_context
+    if extracted_triple != []:
         cm.add_graph_memory(triple)
-        cm.add_meta_memory(vectorized_metadata)
+        # cm.add_meta_memory(vectorized_metadata)
 
-        print(f'Context: {context}')
+    print(f'Context: {context}')
 
-        return context
+    return context
 
 
 ### FURHAT SETUP
