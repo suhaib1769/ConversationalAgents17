@@ -7,8 +7,6 @@ from triples.triple_extraction import *
 from question import *
 from os import system
 
-
-
 ### helper functions & variables
 RUN_WITH_MEMORY = True
 conversation_sessions = ['only_short_term', 'short_and_long_term']
@@ -181,7 +179,17 @@ for session in conversation_sessions:
                     respond("Sorry, as a restaurant booking agent I cannot answer specific questions about {}.".format(intent_string))
                 else:
                     print('c')
-                    query = gen_generic_query(user_input)
+                    if RUN_WITH_MEMORY:
+                        print('e')
+                        context = contextFromMemory(context, user_input, cm)
+                        print("context: ", context)
+                        if context == None:
+                            context = {}
+                            context['knowledge_base_info'] = "No context"
+                        query = gen_contextual_query(context, user_input) if RUN_WITH_MEMORY else user_input
+                    else:
+                        query = gen_generic_query(user_input)
+                    
                     response = ask_GPT(user_input)
                     respond(response)
             else:
